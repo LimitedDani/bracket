@@ -1,0 +1,52 @@
+networks:
+  bracket_lan:
+    driver: bridge
+
+volumes:
+  bracket_pg_data:
+  bracket_static_data:
+
+services:
+  bracket:
+    container_name: bracket
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      args:
+        # Baked into the static frontend at build time. Must be the public
+        # address the browser uses to reach the API (incl. the /api prefix).
+        VITE_API_BASE_URL: "http://${SERVER_IP}:${PORT}/api"
+        VITE_HCAPTCHA_SITE_KEY: "${VITE_HCAPTCHA_SITE_KEY:-10000000-ffff-ffff-ffff-000000000001}"
+    depends_on:
+      - postgres
+    environment:
+      ENVIRONMENT: PRODUCTION
+      # Frontend and backend share one origin, so CORS is the public address.
+      CORS_ORIGINS: "http://${SERVER_IP}:${PORT}"
+      PG_DSN: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      JWT_SECRET: "${JWT_SECRET}"
+      ADMIN_EMAIL: "${ADMIN_EMAIL}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
+      SERVE_FRONTEND: "true"
+      API_PREFIX: "/api"
+      AUTO_RUN_MIGRATIONS: "true"
+      ALLOW_USER_REGISTRATION: "${ALLOW_USER_REGISTRATION:-false}"
+    networks:
+      - bracket_lan
+    ports:
+      - "${PORT}:8400"
+    restart: unless-stopped
+    volumes:
+      - bracket_static_data:/app/static
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB}"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    networks:
+      - bracket_lan
+    restart: always
+    volumes:
+      - bracket_pg_data:/var/lib/postgresql/data
