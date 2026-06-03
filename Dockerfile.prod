@@ -10,7 +10,7 @@
 # (VITE_API_BASE_URL) is baked in at BUILD time. It must therefore point to
 # the PUBLIC address the browser can reach, including the /api prefix, e.g.:
 #
-#   --build-arg VITE_API_BASE_URL=http://134.209.92.254:8400/api
+#   --build-arg VITE_API_BASE_URL=http://167.71.11.32:8400/api
 #
 # The host port you publish the container on MUST match the port used here.
 # ---------------------------------------------------------------------------
@@ -24,7 +24,7 @@ ENV NODE_ENV=production
 
 # Public address of the backend API (including the /api prefix), as reached
 # from the user's browser. Defaults to the target server IP on port 8400.
-ARG VITE_API_BASE_URL="http://134.209.92.254:8400/api"
+ARG VITE_API_BASE_URL="http://167.71.11.32:8400/api"
 ARG VITE_HCAPTCHA_SITE_KEY="10000000-ffff-ffff-ffff-000000000001"
 
 COPY frontend .
